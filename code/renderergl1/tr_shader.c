@@ -3137,6 +3137,21 @@ static void CreateExternalShaders( void ) {
 	tr.sunShader = R_FindShader( "sun", LIGHTMAP_NONE, qtrue );
 }
 
+static void CreateOBShader (void)
+{
+	// leilei - make overbright shader (portability hack)
+	InitShader( "<overbrights>", LIGHTMAP_NONE );
+	stages[0].bundle[0].image[0] = tr.whiteImage;
+	stages[0].active = qtrue;
+	shader.cullType = CT_TWO_SIDED;
+	stages[0].stateBits = GLS_SRCBLEND_DST_COLOR | GLS_DSTBLEND_ONE ;
+	stages[0].constantColor[0] = 255;
+	stages[0].constantColor[1] = 255;
+	stages[0].constantColor[2] = 255;
+	stages[0].rgbGen = CGEN_CONST;
+	tr.overbrightShader = FinishShader();
+}
+
 /*
 ==================
 R_InitShaders
@@ -3152,4 +3167,6 @@ void R_InitShaders( void ) {
 	ScanAndLoadShaderFiles();
 
 	CreateExternalShaders();
+
+	CreateOBShader();
 }

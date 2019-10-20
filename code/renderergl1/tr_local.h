@@ -955,6 +955,8 @@ typedef struct {
 	float					sawToothTable[FUNCTABLE_SIZE];
 	float					inverseSawToothTable[FUNCTABLE_SIZE];
 	float					fogTable[FOG_TABLE_SIZE];
+
+	shader_t				*overbrightShader;
 } trGlobals_t;
 
 extern backEndState_t	backEnd;
@@ -1051,6 +1053,8 @@ extern	cvar_t	*r_anaglyphMode;
 extern	cvar_t	*r_greyscale;
 
 extern	cvar_t	*r_ignoreGLErrors;
+
+extern	cvar_t	*r_widescreen;
 
 extern	cvar_t	*r_overBrightBits;
 extern	cvar_t	*r_mapOverBrightBits;

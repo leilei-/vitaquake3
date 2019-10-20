@@ -389,6 +389,33 @@ void RE_RenderScene( const refdef_t *fd ) {
 
 	parms.fovX = tr.refdef.fov_x;
 	parms.fovY = tr.refdef.fov_y;
+
+	// leilei - widescreen
+	// recalculate fov according to widescreen parameters
+	if (!( fd->rdflags & RDF_NOWORLDMODEL ) && r_widescreen->integer ) // don't affect interface refdefs
+	{
+		float zoomfov = tr.refdef.fov_x / 90;	// figure out our zoom or changed fov magnitiude from cg_fov and cg_zoomfov
+		int thisisit;
+
+		// find aspect to immediately match our vidwidth for perfect match with resized screens...
+		float erspact = tr.refdef.width / tr.refdef.height;
+		float aspact = glConfig.vidWidth / glConfig.vidHeight;
+		if (erspact == aspact) thisisit = 1;
+	
+		// try not to recalculate fov of ui and hud elements
+		if (((tr.refdef.fov_x /  tr.refdef.fov_y) > 1.3) && (thisisit))
+
+			{
+			// undo vert-
+			parms.fovY = parms.fovY * (73.739792 / tr.refdef.fov_y) * zoomfov;
+			
+			// recalculate the fov
+			parms.fovX = (atan (glConfig.vidWidth / (glConfig.vidHeight / tan ((parms.fovY * M_PI) / 360.0f))) * 360.0f) / M_PI;
+			parms.fovY = (atan (glConfig.vidHeight / (glConfig.vidWidth / tan ((parms.fovX * M_PI) / 360.0f))) * 360.0f) / M_PI;
+			}
+	}
+
+	// leilei - end
 	
 	parms.stereoFrame = tr.refdef.stereoFrame;
 

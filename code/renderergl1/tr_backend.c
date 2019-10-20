@@ -1028,6 +1028,85 @@ const void *RB_ClearDepth(const void *data)
 	return (const void *)(cmd + 1);
 }
 
+
+/*
+=============
+RB_BrightScreen
+
+leilei - hack to add overbrights back in by rendering a blended plane. 
+	hopefully, the hardware libretro targets have a good enough fillrate to accept
+	this.  it's not a 1999 16bpp hell market anymore so what's the harm
+=============
+*/
+
+static int doneAltBrightness;
+
+void RB_BrightScreen( void )
+{
+	if ( doneAltBrightness )
+		return;
+	{
+		int eh, ah;
+		if ((r_overBrightBits->integer)) {
+			ah = r_overBrightBits->integer;
+			if (ah < 1) {
+				ah = 1;
+			}
+			if (ah > 2) {
+				ah = 2;   
+			}
+
+			// Blend method
+			// do a loop for every overbright bit enabled
+
+			for (eh=0; eh<ah; eh++)
+				{
+					//int vertexStart = tess.numVertexes;
+//					GL_State( GLS_DEPTHTEST_DISABLE | GLS_SRCBLEND_DST_COLOR | GLS_DSTBLEND_ONE );
+//					GL_Bind( tr.whiteImage );
+//					GL_Cull( CT_TWO_SIDED );
+				
+					RB_BeginSurface( tr.overbrightShader, 0 );
+					tess.xyz[tess.numVertexes][0] = 0;
+					tess.xyz[tess.numVertexes][1] = 0;
+					tess.numVertexes++;
+
+					tess.xyz[tess.numVertexes][0] = 0;
+					tess.xyz[tess.numVertexes][1] = glConfig.vidHeight;
+					tess.numVertexes++;
+
+					tess.xyz[tess.numVertexes][0] = glConfig.vidWidth;
+					tess.xyz[tess.numVertexes][1] = glConfig.vidHeight;
+					tess.numVertexes++;
+
+					tess.xyz[tess.numVertexes][0] = glConfig.vidWidth;
+					tess.xyz[tess.numVertexes][1] = 0;
+					tess.numVertexes++;
+
+
+					tess.indexes[tess.numIndexes++] = 0;
+					tess.indexes[tess.numIndexes++] = 1;
+					tess.indexes[tess.numIndexes++] = 2;
+					tess.indexes[tess.numIndexes++] = 0;
+					tess.indexes[tess.numIndexes++] = 2;
+					tess.indexes[tess.numIndexes++] = 3;
+
+				//	GL_State( GLS_DEPTHTEST_DISABLE | GLS_SRCBLEND_DST_COLOR | GLS_DSTBLEND_ONE );
+				//	GL_Bind( tr.whiteImage );
+				//	GL_Cull( CT_TWO_SIDED );
+
+					RB_EndSurface();
+
+
+
+				}
+			doneAltBrightness = qtrue;
+		}
+	}
+
+}
+
+
 /*
 =============
 RB_SwapBuffers
@@ -1049,6 +1128,8 @@ const void	*RB_SwapBuffers( const void *data ) {
 
 	cmd = (const swapBuffersCommand_t *)data;
 
+	RB_BrightScreen();
+
 	if ( !glState.finishCalled ) {
 		qglFinish();
 	}
@@ -1058,7 +1139,7 @@ const void	*RB_SwapBuffers( const void *data ) {
 	GLimp_EndFrame();
 
 	backEnd.projection2D = qfalse;
-
+	doneAltBrightness=0;
 	return (const void *)(cmd + 1);
 }
 
